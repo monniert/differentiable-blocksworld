@@ -1,0 +1,49 @@
+dataset:
+  name: nerfstudio
+  tag: one_side_cylinders
+  downscale_factor: 2
+model:
+  name: dbw
+  mesh:
+    n_blocks: 10
+    S_world: 0.5
+    R_world: [-80, -20, 0]
+    T_world: [-1.5, -1.5, 0]
+    txt_size: 256
+  renderer:
+    faces_per_pixel: 10
+    cameras:
+      name: perspective
+    detach_bary: True
+    z_clip: 0.001
+  rend_optim:
+    coarse_learning: 350
+    decimate_txt: 175
+    decimate_factor: 8
+    kill_blocks: True
+    decouple_rendering: True
+    opacity_noise: True
+  loss:
+    rgb_weight: 1
+    perceptual_weight: 0.1
+    parsimony_weight: 0.01
+    tv_weight: 0.1
+    overlap_weight: 1
+training:
+  batch_size: 4
+  n_workers: 4
+  optimizer:
+    name: adam
+    lr: 5.0e-3
+    texture:
+      lr: 5.0e-2
+  scheduler:
+    name: multi_step
+    gamma: [0.1, 0.1]
+    milestones: [450]
+  n_epoches: 480
+  train_stat_interval: 50
+  val_stat_interval: 100
+  seed: 666641
+  visualizer_port: 8888
+  resume:

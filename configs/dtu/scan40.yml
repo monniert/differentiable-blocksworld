@@ -1,0 +1,4 @@
+dataset:
+  name: dtu
+  tag: scan40
+  img_size: [300, 400]

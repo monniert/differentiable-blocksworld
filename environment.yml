@@ -1,0 +1,30 @@
+name: dbw
+channels:
+  - fvcore
+  - iopath
+  - pytorch
+  - pytorch3d
+  - conda-forge
+  - anaconda
+  - defaults
+dependencies:
+  - cudatoolkit=11.3.1
+  - fvcore=0.1.5
+  - imageio=2.21.1
+  - imageio-ffmpeg=0.4.8
+  - iopath=0.1.9
+  - numpy=1.23.4
+  - pip=22.3.1
+  - python=3.8.13
+  - pytorch=1.12.1
+  - pytorch3d=0.7.1
+  - scipy=1.9.3
+  - seaborn=0.12.0
+  - toolz=0.12.0
+  - torchvision=0.13.1
+  - pip:
+    - gdown==4.7.1
+    - lpips==0.1.4
+    - open3d==0.16.0
+    - opencv-python==4.6.0.66
+    - trimesh==3.15.8

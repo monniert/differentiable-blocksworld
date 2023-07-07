@@ -1,0 +1,36 @@
+# OS generated files
+*.swp
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Jupyter Notebook
+.ipynb_checkpoints
+scripts/report.sh
+scripts/pipeline_full.sh
+
+# python
+*.py.swp
+*.pyc
+*.pyo
+
+# heavy files
+*.pkl
+_cache*
+*.zip
+
+# symlinks
+data
+outputs
+
+# folders
+/datasets
+/jeanzay
+/notebook
+/models
+/runs
+/visdom
