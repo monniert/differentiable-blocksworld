@@ -13,7 +13,7 @@ from . import path_exists, path_mkdir, get_files_from
 from .logger import print_info, print_warning
 
 
-os.environ['IMAGEIO_FFMPEG_EXE'] = '/usr/bin/ffmpeg'  # XXX pytorch's ffmpeg install does not support H.264 format
+# os.environ['IMAGEIO_FFMPEG_EXE'] = '/usr/bin/ffmpeg'  # XXX pytorch's ffmpeg install does not support H.264 format
 logging.getLogger('imageio_ffmpeg').setLevel(logging.ERROR)  # to silence warning messages of imageio
 IMG_EXTENSIONS = ['jpeg', 'jpg', 'JPG', 'png', 'ppm', 'JPEG']
 MAX_GIF_SIZE = 256
@@ -106,12 +106,12 @@ def save_video(imgs_or_path, name, in_ext='jpg', as_gif=False, fps=24, quality=1
 
     if as_gif:
         out_gif = path.parent / (name.split('.')[0] + '.gif')
-        os.system(f'/usr/bin/ffmpeg -i {out} -hide_banner -loglevel error -vf "fps={fps},'
+        os.system(f'ffmpeg -i {out} -hide_banner -loglevel error -vf "fps={fps},'
                   f'split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" -loop 0 {out_gif}')
 
     # XXX output video is huge + has incorrect format/codec, passing it through ffmpeg fixes the issue
     out_tmp = out.parent / f'{out.stem}_tmp{out.suffix}'
-    os.system(f'/usr/bin/ffmpeg -i {out} -hide_banner -loglevel error {out_tmp}')
+    os.system(f'ffmpeg -i {out} -hide_banner -loglevel error {out_tmp}')
     shutil.move(str(out_tmp), str(out))
 
 

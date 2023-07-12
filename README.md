@@ -15,7 +15,7 @@ Differentiable Blocks World:<br> Qualitative 3D Decomposition by Rendering Primi
 
 <a href="https://www.tmonnier.com/DBW/"><img 
 src="https://img.shields.io/badge/-Webpage-blue.svg?colorA=333&logo=html5" height=35em></a>
-<a href="https://arxiv.org/abs/arxivid"><img 
+<a href="https://arxiv.org/abs/2307.05473"><img 
 src="https://img.shields.io/badge/-Paper-blue.svg?colorA=333&logo=arxiv" height=35em></a>
 <a href="https://www.tmonnier.com/DBW/ref.bib"><img 
 src="https://img.shields.io/badge/-BibTeX-blue.svg?colorA=333&logo=latex" height=35em></a>
@@ -26,7 +26,7 @@ src="https://img.shields.io/badge/-BibTeX-blue.svg?colorA=333&logo=latex" height
 </h2>
 </div>
 
-Official PyTorch implementation of [**Differentiable Blocks World: Qualitative 3D Decomposition by Rendering Primitives**](https://arxiv.org/abs/arxivid).
+Official PyTorch implementation of [**Differentiable Blocks World: Qualitative 3D Decomposition by Rendering Primitives**](https://arxiv.org/abs/2307.05473).
 Check out our [**webpage**](https://www.tmonnier.com/DBW/) for video results!
 
 This repository contains:
@@ -43,7 +43,7 @@ This repository contains:
 @article{monnier2023dbw,
   title={{Differentiable Blocks World: Qualitative 3D Decomposition by Rendering Primitives}},
   author={Monnier, Tom and Austin, Jake and Kanazawa, Angjoo and Efros, Alexei A. and Aubry, Mathieu},
-  journal={{arXiv:arxivid [cs.CV]}},
+  journal={{arXiv:2307.05473 [cs.CV]}},
   year={2023},
 }
 ```
@@ -59,10 +59,8 @@ conda env create -f environment.yml
 conda activate dbw
 ```
 
-You need to have a working `ffmpeg` library located at `/usr/bin/ffmpeg` to save video results.
-
 <details>
-<summary><b>Optional visualization :chart_with_downwards_trend:</b></summary>
+<summary><b>Optional live monitoring :chart_with_downwards_trend:</b></summary>
 Some monitoring routines are implemented, you can use them by specifying your
 visdom port in the config file. You will need to install visdom from source beforehand:
 
@@ -77,7 +75,7 @@ cd visdom && pip install -e .
 If you want to load data processed by Nerfstudio (e.g., for a custom scene),
 you will need to install nerfstudio as described 
 <a href=https://github.com/nerfstudio-project/nerfstudio/blob/main/docs/quickstart/installation.md>here</a>.
-Normally, executing the following lines should work:
+In general, executing the following lines should do the job:
 
 ```
 pip install ninja==1.10.2.3 git+https://github.com/NVlabs/tiny-cuda-nn/#subdirectory=bindings/torch
@@ -104,7 +102,7 @@ This command will download one of the following sets of scenes presented in the 
 - `Nerfstudio`: [paper](https://arxiv.org/abs/2302.04264) / 
   [repo](https://github.com/nerfstudio-project/nerfstudio) /
   [dataset](https://drive.google.com/file/d/1wsUVqJlsZY-dp9dSemghGe0ijOo9AOM5/view?usp=sharing) 
-  (2.67GB)
+  (2.67GB, containing images and Nerfacto models for the 2 scenes in the paper)
 
 It may happen that `gdown` hangs, if so download the file manually and move it to the `datasets` folder.
 
