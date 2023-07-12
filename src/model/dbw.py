@@ -5,7 +5,6 @@ from pathlib import Path
 
 import numpy as np
 from pytorch3d.io import save_ply
-from pytorch3d.ops import sample_points_from_meshes
 from pytorch3d.ops.subdivide_meshes import SubdivideMeshes
 from pytorch3d.renderer import TexturesUV
 from pytorch3d.structures.meshes import join_meshes_as_scene, join_meshes_as_batch
@@ -20,7 +19,6 @@ from .loss import get_loss, mse2psnr, tv_norm_funcs
 from .renderer import Renderer, get_circle_traj, save_trajectory_as_video, save_mesh_as_video, DIRECTION_LIGHT
 from .tools import safe_model_state_dict, elev_to_rotation_matrix, azim_to_rotation_matrix, roll_to_rotation_matrix
 from utils import use_seed, path_mkdir
-from utils.chamfer import chamfer_distance
 from utils.image import convert_to_img
 from utils.logger import print_warning
 from utils.metrics import AverageMeter
@@ -31,9 +29,6 @@ from utils.superquadric import parametric_sq, implicit_sq, sample_sq
 
 
 VIZ_SIZE = 256
-N_POINTS_EVAL = int(5e5)
-CHAMFER_FACTOR = 10
-
 DECIMATE_FACTOR = 8
 OVERLAP_N_POINTS = 1000
 OVERLAP_N_BLOCKS = 1.95
@@ -467,17 +462,10 @@ class DifferentiableBlocksWorld(nn.Module):
             return True if self.cur_epoch < milestone else False
 
     @torch.no_grad()
-    def quantitative_eval(self, loader, device, hard_inference=False):
+    def quantitative_eval(self, loader, device, hard_inference=True):
         self.eval()
-
-        mesh = self.build_scene(filter_transparent=True, w_bkg=False, reduce_ground=True)
         opacities = self.get_opacities()
         n_blocks = (opacities > 0.5).sum().item()
-        points = sample_points_from_meshes(mesh, N_POINTS_EVAL)
-        gt = loader.dataset.pc_gt
-        gt = gt[torch.randperm(len(gt))[:N_POINTS_EVAL]].to(device)
-        acc, comp = chamfer_distance(points, gt[None], return_L1=True, direction_reduction='none')[0]
-        acc, comp = CHAMFER_FACTOR * acc.item(), CHAMFER_FACTOR * comp.item()
 
         mse_func = get_loss('mse')().to(device)
         ssim_func = get_loss('ssim')(padding=False).to(device)
@@ -499,8 +487,8 @@ class DifferentiableBlocksWorld(nn.Module):
             lpips.update(lpips_func(imgs, rec), N=N)
 
         return OrderedDict(
-            [('n_blocks', n_blocks), ('chL1_acc', acc), ('chL1_comp', comp), ('L_tot', loss_tot.avg),
-             ('L_rec', loss_rec.avg), ('PSNR', psnr.avg), ('SSIM', ssim.avg), ('LPIPS', lpips.avg)]
+            [('n_blocks', n_blocks), ('L_tot', loss_tot.avg), ('L_rec', loss_rec.avg),
+             ('PSNR', psnr.avg), ('SSIM', ssim.avg), ('LPIPS', lpips.avg)]
             + [(f'alpha{k}', alpha.item()) for k, alpha in enumerate(opacities)]
         )
 

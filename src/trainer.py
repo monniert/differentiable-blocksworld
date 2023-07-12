@@ -246,15 +246,9 @@ class Trainer:
         self.model.qualitative_eval(self.test_loader, self.device, path=out)
 
         # quantitative
-        scores = self.model.quantitative_eval(self.test_loader, self.device)
+        scores = self.model.quantitative_eval(self.test_loader, self.device, hard_inference=True)
         print_log('final_scores: ' + ', '.join(["{}={:.5f}".format(k, v) for k, v in scores.items()]))
         with open(self.run_dir / 'final_scores.tsv', mode='w') as f:
-            f.write("\t".join(scores.keys()) + "\n")
-            f.write("\t".join(map('{:.5f}'.format, scores.values())) + "\n")
-
-        scores = self.model.quantitative_eval(self.test_loader, self.device, hard_inference=True)
-        print_log('final_scores_hard: ' + ', '.join(["{}={:.5f}".format(k, v) for k, v in scores.items()]))
-        with open(self.run_dir / 'final_scores_hard.tsv', mode='w') as f:
             f.write("\t".join(scores.keys()) + "\n")
             f.write("\t".join(map('{:.5f}'.format, scores.values())) + "\n")
 

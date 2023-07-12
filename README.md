@@ -102,7 +102,7 @@ This command will download one of the following sets of scenes presented in the 
 - `Nerfstudio`: [paper](https://arxiv.org/abs/2302.04264) / 
   [repo](https://github.com/nerfstudio-project/nerfstudio) /
   [dataset](https://drive.google.com/file/d/1wsUVqJlsZY-dp9dSemghGe0ijOo9AOM5/view?usp=sharing) 
-  (2.67GB, containing images and Nerfacto models for the 2 scenes in the paper)
+  (2.67GB, images and Nerfacto models for the 2 scenes in the paper)
 
 It may happen that `gdown` hangs, if so download the file manually and move it to the `datasets` folder.
 
@@ -146,7 +146,9 @@ The approximate optimization time is roughly 4 hours on a single GPU.
 
 <img src="media/dtu_table.png" alt="dtu_table.png" width="800px"/>
 
-Our model is evaluated at the end of each training and scores are written in `final_scores.tsv`.
+Our model is evaluated at the end of each run and scores are written in `dtu_scores.tsv`
+for the official Chamfer evaluation and `final_scores.tsv` for training losses, transparencies and
+image rendering metrics.
 To reproduce our results on a single DTU scene, run the 
 following command which will launch 5 sequential runs with different seeds
 (the `auto` score is the one with minimal training loss):
