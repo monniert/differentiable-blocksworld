@@ -421,13 +421,13 @@ class DifferentiableBlocksWorld(nn.Module):
     def get_scene_face_colors(self, filter_transparent=False, w_env=True):
         val_blocks = torch.linspace(0, 1, self.n_blocks + 1)[1:]
         if filter_transparent:
-            val_blocks = val_blocks[self.get_opacities() > 0.5]
+            val_blocks = val_blocks[self.get_opacities().cpu() > 0.5]
         elif self.kill_blocks:
-            val_blocks = val_blocks[self.get_opacities() > 0.01]
+            val_blocks = val_blocks[self.get_opacities().cpu() > 0.01]
         cmap = get_fancy_cmap()
         NFE = self.env_n_faces if w_env else 0
         values = torch.cat([torch.zeros(NFE) , val_blocks.repeat_interleave(self.BNF)])
-        colors = cmap(values.cpu().numpy())
+        colors = cmap(values.numpy())
         return torch.from_numpy(colors).float().to(self.bkg.device)
 
     @torch.no_grad()
