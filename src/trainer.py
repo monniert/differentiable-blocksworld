@@ -1,9 +1,9 @@
 import argparse
 from pathlib import Path
 import time
-from toolz import merge, keyfilter, valmap
 import warnings
 
+from toolz import merge, keyfilter, valmap
 import numpy as np
 from pytorch3d.structures import Meshes
 import torch
@@ -19,7 +19,7 @@ from utils.image import ImageLogger
 from utils.logger import create_logger, print_log, print_warning
 from utils.metrics import Metrics
 from utils.path import CONFIGS_PATH, RUNS_PATH, DATASETS_PATH
-from utils.plot import plot_lines, Visualizer, get_fancy_cmap
+from utils.plot import plot_lines, VisdomVisualizer, get_fancy_cmap, create_visualizer
 from utils.pytorch import get_torch_device, torch_to
 
 
@@ -68,10 +68,9 @@ class Trainer:
         self.rec3_logger = ImageLogger(self.run_dir / 'reconstructions_syn', self.viz_samples, out_ext='png')
         self.txt_logger = ImageLogger(self.run_dir / 'txt_blocks', out_ext=out_ext)
         if self.with_training:
-            viz_port = cfg['training'].get('visualizer_port')
-            self.visualizer = Visualizer(viz_port, self.run_dir)
-        else:  # no visualizer if eval only
-            self.visualizer = Visualizer(None, self.run_dir)
+            self.visualizer = create_visualizer(cfg, self.run_dir)
+        else:  # no visualizer (VisdomVisualizer without port does nothing) if eval only
+            self.visualizer = VisdomVisualizer(None, self.run_dir)
 
     @property
     def with_training(self):
@@ -109,20 +108,26 @@ class Trainer:
     @use_seed()
     def run(self):
         cur_iter = (self.epoch_start - 1) * self.n_batches + self.batch_start
+        log_iters = np.unique(
+            np.geomspace(1, self.n_batches * self.n_epoches, 500).astype(int))
+        self.log_dataset_visualization(cur_iter)
         self.log_visualizations(cur_iter)
         for epoch in range(self.epoch_start, self.n_epoches + 1):
             batch_start = self.batch_start if epoch == self.epoch_start else 1
             for batch, (images, labels) in enumerate(self.train_loader, start=1):
                 if batch < batch_start:
                     continue
+
                 self.run_single_batch_train(images, labels)
+
                 if cur_iter % self.train_stat_interval == 0:
                     self.log_train_metrics(cur_iter, epoch, batch)
 
-                if cur_iter % self.val_stat_interval == 0:
+                if cur_iter % self.val_stat_interval == 0 or cur_iter in log_iters:
                     self.run_val_and_log(cur_iter, epoch, batch)
                     self.log_visualizations(cur_iter)
                     self.save(epoch=epoch, batch=batch)
+
                 cur_iter += 1
             self.step(epoch + 1, batch=1)
             if epoch in self.save_epoches:
@@ -157,7 +162,7 @@ class Trainer:
         print_log(LOG_FMT(epoch, self.n_epoches, batch, self.n_batches, f'val_metrics: {metrics}')[:1000])
         cmap = get_fancy_cmap()
         colors = (cmap(np.linspace(0, 1, len(named_values) + 1)[1:]) * 255).astype(np.uint8)
-        self.visualizer.upload_lineplot(it, metrics.get_named_values(), title='opacities', colors=colors)
+        self.visualizer.log_scalars(it, metrics.get_named_values(), title='opacities', colors=colors)
         metrics.log_and_reset(it=it, epoch=epoch, batch=batch)
 
     def step(self, epoch, batch):
@@ -171,32 +176,43 @@ class Trainer:
     def log_train_metrics(self, it, epoch, batch):
         metrics = self.train_metrics
         print_log(LOG_FMT(epoch, self.n_epoches, batch, self.n_batches, f'train_metrics: {metrics}')[:1000])
-        self.visualizer.upload_lineplot(it, metrics.get_named_values(lambda s: 'loss' in s), title='train_losses')
+        self.visualizer.log_scalars(it, metrics.get_named_values(lambda s: 'loss' in s), title='train_losses')
         metrics.log_and_reset(it=it, epoch=epoch, batch=batch)
 
     @torch.no_grad()
     def log_visualizations(self, cur_iter):
         self.model.eval()
-        # Log soft reconstructions with edges
-        rec = self.model.predict(self.viz_samples, self.viz_labels, w_edges=True)
-        self.rec_logger.save(rec, cur_iter)
-        imgs = F.resize(self.viz_samples['imgs'], rec.shape[-2:], antialias=True)
-        self.visualizer.upload_images(torch.stack([imgs, rec], dim=1).reshape(-1, *imgs.shape[1:]), 'recons', 2)
 
-        # Log hard reconstructions
-        rec = self.model.predict(self.viz_samples, self.viz_labels, filter_transparent=True)
-        self.rec2_logger.save(rec, cur_iter)
-        self.visualizer.upload_images(torch.stack([imgs, rec], dim=1).reshape(-1, *imgs.shape[1:]), 'recons_hard', 2)
+        self.visualizer.log_model(cur_iter, self.model)
+
+        # Log soft reconstructions
+        renders = self.model.predict(self.viz_samples, self.viz_labels)
+        self.rec_logger.save(renders, cur_iter)
+        imgs = F.resize(self.viz_samples['imgs'], renders.shape[-2:], antialias=True)
+        self.visualizer.log_renders(cur_iter, renders, 'recons')
+
+        # Log hard reconstructions with edges
+        renders = self.model.predict(self.viz_samples, self.viz_labels, w_edges=True, filter_transparent=True)
+        self.rec2_logger.save(renders, cur_iter)
+        self.visualizer.log_renders(cur_iter, renders, 'recons_hard_w_edges')
+
+        # Log hard reconstructions wo edges
+        renders = self.model.predict(self.viz_samples, self.viz_labels, filter_transparent=True)
+        self.visualizer.log_renders(cur_iter, renders, 'recons_hard_wo_edges')
 
         # Log rendering with synthetic colors
-        rec = self.model.predict_synthetic(self.viz_samples, self.viz_labels)
-        self.rec3_logger.save(rec, cur_iter)
-        self.visualizer.upload_images(torch.stack([imgs, rec], dim=1).reshape(-1, *imgs.shape[1:]), 'recons_syn', 2)
+        renders = self.model.predict_synthetic(self.viz_samples, self.viz_labels)
+        self.rec3_logger.save(renders, cur_iter)
+        self.visualizer.log_renders(cur_iter, renders, 'recons_syn')
 
         # Log textures
         txt = self.model.get_arranged_block_txt()
         self.txt_logger.save(txt, cur_iter)
-        self.visualizer.upload_images(txt, 'textures', 1, max_size=256)
+        self.visualizer.log_textures(cur_iter, txt[0], 'textures', max_size=256)
+
+    @torch.no_grad()
+    def log_dataset_visualization(self, cur_iter):
+        self.visualizer.log_dataset(cur_iter, self.dataset)
 
     def save(self, epoch, batch, checkpoint=False):
         state = {

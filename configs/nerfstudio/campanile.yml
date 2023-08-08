@@ -46,5 +46,7 @@ training:
   train_stat_interval: 50
   val_stat_interval: 100
   seed: 222213
-  visualizer_port: 8888
+  visualizer: 
+    name: visdom
+    port: 8888
   resume:

@@ -21,13 +21,18 @@ src="https://img.shields.io/badge/-Paper-blue.svg?colorA=333&logo=arxiv" height=
 src="https://img.shields.io/badge/-BibTeX-blue.svg?colorA=333&logo=latex" height=35em></a>
 <p></p>
 
-![teaser.gif](./media/teaser.gif)
-
 </h2>
 </div>
 
-Official PyTorch implementation of [**Differentiable Blocks World: Qualitative 3D Decomposition by Rendering Primitives**](https://arxiv.org/abs/2307.05473).
-Check out our [**webpage**](https://www.tmonnier.com/DBW/) for video results!
+
+https://github.com/roym899/differentiable-blocksworld/assets/9785832/addde5ea-cc8f-40aa-8960-b69fd36f860a
+
+
+Modified PyTorch implementation of [**Differentiable Blocks World: Qualitative 3D Decomposition by Rendering Primitives**](https://arxiv.org/abs/2307.05473).
+
+This fork has been modified to use [Rerun](https://github.com/rerun-io/rerun) for visualization.
+
+Check out this [**webpage**](https://www.tmonnier.com/DBW/) for more video results!
 
 This repository contains:
 
@@ -52,7 +57,21 @@ This repository contains:
 
 ## Installation :construction_worker:
 
-### 1. Create conda environment :wrench:
+### 1. Setup environment :wrench:
+
+#### Custom environment (venv / pyenv / direnv / etc.)
+
+Starting from an empty Python environment (e.g., `python3 -m venv dbw`) with CUDA 11.7 or 11.8 available (check that `nvcc --version` is working), install torch for your CUDA version (see [PyTorch website](https://pytorch.org/get-started/locally/) for more details). 
+
+Subsequently install all other requirements using 
+```
+pip install -r requirements.txt
+```
+Note that this will install pytorch3d from source, which requires torch to be installed first, hence the torch installation step above.
+
+TODO make sure this works as expected
+
+#### Conda
 
 ```
 conda env create -f environment.yml

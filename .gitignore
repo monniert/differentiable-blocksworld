@@ -8,6 +8,10 @@
 ehthumbs.db
 Thumbs.db
 
+# Environment files
+.envrc
+.python-version
+
 # Jupyter Notebook
 .ipynb_checkpoints
 scripts/report.sh

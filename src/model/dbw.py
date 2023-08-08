@@ -294,7 +294,7 @@ class DifferentiableBlocksWorld(nn.Module):
 
         return Meshes(verts, faces, textures=TexturesUV(maps, faces, self.ground_verts_uvs[None], align_corners=True))
 
-    def build_blocks(self, filter_transparent=False, world_coord=False, as_scene=False, synthetic_colors=False):
+    def build_blocks(self, filter_transparent=False, world_coord=False, as_scene=False, synthetic_colors=False, filter_killed=True):
         coarse_learning = self.training and self.is_live('coarse_learning')
         S, R, T = self.S.exp() + self.scale_min, rotation_6d_to_matrix(self.R_6d), self.T
         if self.opacity_noise and coarse_learning:
@@ -313,7 +313,7 @@ class DifferentiableBlocksWorld(nn.Module):
         self._blocks_maps, self._blocks_SRT = maps, (S, R, T)
 
         # Filter blocks based on opacities
-        if filter_transparent or self.kill_blocks:
+        if filter_transparent or (self.kill_blocks and filter_killed):
             if filter_transparent:
                 mask = torch.sigmoid(self.alpha_logit) > 0.5
             else:

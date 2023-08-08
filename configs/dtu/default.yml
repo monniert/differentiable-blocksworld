@@ -37,8 +37,10 @@ training:
     gamma: [0.1, 0.1]
     milestones: [1700]
   n_epoches: 1800
-  train_stat_interval: 50
-  val_stat_interval: 100
+  train_stat_interval: 1
+  val_stat_interval: 1
   seed: 227391
-  visualizer_port:
+  visualizer: 
+    name: rerun
+    rrd_filename:
   resume:
