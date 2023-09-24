@@ -184,6 +184,7 @@ class Trainer:
         self.model.eval()
 
         self.visualizer.log_model(cur_iter, self.model)
+        return
 
         # Log soft reconstructions
         renders = self.model.predict(self.viz_samples, self.viz_labels)
