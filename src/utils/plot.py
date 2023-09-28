@@ -9,7 +9,6 @@ import numpy as np
 import pandas as pd
 import PIL
 import rerun as rr
-import rerun.experimental as rr2
 import seaborn as sns
 import torch
 import trimesh
@@ -37,7 +36,7 @@ class RerunVisualizer:
         rr.init("Differential Block World", spawn=rrd_filename is None)
 
         # assumption: +Y is up (typically has to be adjusted to dataset)
-        rr2.log("world", rr2.ViewCoordinates.RUB, timeless=True)
+        rr.log("world", rr.ViewCoordinates.RUB, timeless=True)
 
         if rrd_filename is not None:
             rr.save(os.path.join(run_dir, rrd_filename))
@@ -48,14 +47,14 @@ class RerunVisualizer:
 
     def log_textures(self, cur_iter, textures, title, *_, **__):
         self.set_iteration(cur_iter)
-        rr2.log(f"{title}", rr2.Image(textures.permute(1, 2, 0)))
+        rr.log(f"{title}", rr.Image(textures.permute(1, 2, 0)))
 
     def log_renders(
         self, cur_iter, renders, title, gts=None, max_size=VIZ_MAX_IMG_SIZE, *_, **__
     ):
         self.set_iteration(cur_iter)
         for i, render in enumerate(renders[: self.max_renders]):
-            rr2.log(f"{title}/#{i}", rr2.Image(render.permute(1, 2, 0)))
+            rr.log(f"{title}/#{i}", rr.Image(render.permute(1, 2, 0)))
 
     def log_p3d_mesh(self, entity_path, p3d_mesh, invert_normals=False):
         file_name = entity_path.replace("/", "-") + ".glb"
@@ -98,15 +97,13 @@ class RerunVisualizer:
 
         tm_mesh.export(glb_path)
 
-        # TODO(roym899) migrate to 0.9 API once this is supported
-        #  or maybe we don't need to go via file anymore in new API (?)
-        rr.log_mesh_file(entity_path, rr.MeshFormat.GLB, mesh_path=glb_path)
+        rr.log(entity_path, rr.Asset3D.from_file(glb_path))
 
     def log_model(self, cur_iter, model):
         """Log current meshes."""
-        rr2.log(
+        rr.log(
             "world/dbw",
-            rr2.dt.TranslationAndMat3x3(matrix=model.R_world[0].numpy(force=True)),
+            rr.TranslationAndMat3x3(matrix=model.R_world[0].numpy(force=True)),
             timeless=True,
         )
         self.set_iteration(cur_iter)
@@ -130,11 +127,11 @@ class RerunVisualizer:
         ):
             self.log_p3d_mesh(f"world/dbw/blocks/#{i}", block)
             if transparent:
-                rr2.log(f"world/dbw/opaque_blocks/#{i}", rr2.Clear(False))
+                rr.log(f"world/dbw/opaque_blocks/#{i}", rr.Clear.flat())
             else:
                 self.log_p3d_mesh(f"world/dbw/opaque_blocks/#{i}", block)
             if transparent:
-                rr2.log(f"world/dbw/opaque_color_blocks/#{i}", rr2.Clear(False))
+                rr.log(f"world/dbw/opaque_color_blocks/#{i}", rr.Clear.flat())
             else:
                 self.log_p3d_mesh(f"world/dbw/opaque_color_blocks/#{i}", color_block)
 
@@ -157,35 +154,31 @@ class RerunVisualizer:
             rotation = image_dict["R"].clone()
             # row vector convention (pytorch3d) -> column vector convention (rerun)
             rotation = rotation.T
-            # TODO(roym899) can't set LUF directly?
-            rr2.log(
+            rr.log(
                 f"world/dbw/train_images/#{image_id}",
-                rr2.ViewCoordinates.LUF,  # see https://pytorch3d.org/docs/cameras
-            )
-            rr2.log(
-                f"world/dbw/train_images/#{image_id}",
-                rr2.Pinhole(
+                rr.Pinhole(
                     width=width,
                     height=height,
                     focal_length=(fx.item(), fy.item()),
                     principal_point=(cx.item(), cy.item()),
+                    camera_xyz=rr.ViewCoordinates.LUF
                 )
             )
-            rr2.log(
+            rr.log(
                 f"world/dbw/train_images/#{image_id}",
-                rr2.dt.TranslationAndMat3x3(
+                rr.TranslationAndMat3x3(
                     translation=translation, matrix=rotation, from_parent=True
                 ),  # pytorch3d uses camera from world
             )
-            rr2.log(
+            rr.log(
                 f"world/dbw/train_images/#{image_id}",
-                rr2.Image(image_dict["imgs"].permute(1, 2, 0)),
+                rr.Image(image_dict["imgs"].permute(1, 2, 0)),
             )
 
     def log_scalars(self, cur_iter, named_values, title, *_, **__):
         self.set_iteration(cur_iter)
         for name, value in named_values:
-            rr2.log(title + "/" + name, rr2.TimeSeriesScalar(value))
+            rr.log(title + "/" + name, rr.TimeSeriesScalar(value))
 
 
 class VisdomVisualizer:

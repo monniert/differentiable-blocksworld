@@ -59,7 +59,7 @@ pandas==2.0.3
 parso==0.8.3
 pexpect==4.8.0
 pickleshare==0.7.5
-Pillow==9.5.0
+Pillow==10.0.1
 platformdirs==3.9.1
 plotly==5.15.0
 portalocker==2.7.0
@@ -106,5 +106,5 @@ Werkzeug==2.2.3
 widgetsnbextension==4.0.8
 wrapt==1.15.0
 yacs==0.1.8
--f https://build.rerun.io/commit/2e9df4c/wheels 
+-f https://build.rerun.io/commit/29ab0e3/wheels 
 rerun-sdk==0.9.0a4
