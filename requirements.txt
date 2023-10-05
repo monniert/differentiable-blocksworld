@@ -106,5 +106,4 @@ Werkzeug==2.2.3
 widgetsnbextension==4.0.8
 wrapt==1.15.0
 yacs==0.1.8
--f https://build.rerun.io/commit/29ab0e3/wheels 
-rerun-sdk==0.9.0a4
+rerun-sdk>=0.9.0

@@ -97,13 +97,13 @@ class RerunVisualizer:
 
         tm_mesh.export(glb_path)
 
-        rr.log(entity_path, rr.Asset3D.from_file(glb_path))
+        rr.log(entity_path, rr.Asset3D(path=glb_path))
 
     def log_model(self, cur_iter, model):
         """Log current meshes."""
         rr.log(
             "world/dbw",
-            rr.TranslationAndMat3x3(matrix=model.R_world[0].numpy(force=True)),
+            rr.Transform3D(mat3x3=model.R_world[0].numpy(force=True)),
             timeless=True,
         )
         self.set_iteration(cur_iter)
@@ -166,8 +166,8 @@ class RerunVisualizer:
             )
             rr.log(
                 f"world/dbw/train_images/#{image_id}",
-                rr.TranslationAndMat3x3(
-                    translation=translation, matrix=rotation, from_parent=True
+                rr.Transform3D(
+                    translation=translation, mat3x3=rotation, from_parent=True
                 ),  # pytorch3d uses camera from world
             )
             rr.log(
