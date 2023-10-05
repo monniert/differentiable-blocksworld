@@ -26,7 +26,7 @@ src="https://img.shields.io/badge/-BibTeX-blue.svg?colorA=333&logo=latex" height
 </h2>
 </div>
 
-Official PyTorch implementation of [**Differentiable Blocks World: Qualitative 3D Decomposition by Rendering Primitives**](https://arxiv.org/abs/2307.05473).
+Official PyTorch implementation of [**Differentiable Blocks World: Qualitative 3D Decomposition by Rendering Primitives**](https://arxiv.org/abs/2307.05473) (to appear in NeurIPS 2023).
 Check out our [**webpage**](https://www.tmonnier.com/DBW/) for video results!
 
 This repository contains:
@@ -40,10 +40,10 @@ This repository contains:
 <summary>If you find this code useful, don't forget to <b>star the repo :star:</b> and <b>cite the paper :point_down:</b></summary>
 
 ```
-@article{monnier2023dbw,
+@inproceedings{monnier2023dbw,
   title={{Differentiable Blocks World: Qualitative 3D Decomposition by Rendering Primitives}},
   author={Monnier, Tom and Austin, Jake and Kanazawa, Angjoo and Efros, Alexei A. and Aubry, Mathieu},
-  journal={{arXiv:2307.05473 [cs.CV]}},
+  booktitle={{NeurIPS}},
   year={2023},
 }
 ```
